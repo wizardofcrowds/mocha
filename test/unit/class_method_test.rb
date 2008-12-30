@@ -1,5 +1,3 @@
-#!/usr/local/bin/macruby
-
 require File.join(File.dirname(__FILE__), "..", "test_helper")
 require 'method_definer'
 require 'mocha/mock'
@@ -292,5 +290,6 @@ if defined?(MACRUBY_VERSION)
       assert_equal :original_result, klass.send('method:withExtraArg:andAnotherArg:', :method, :param1, :param2)
       assert_equal false, klass.respond_to?(hidden_method)
     end
+    
   end
 end
