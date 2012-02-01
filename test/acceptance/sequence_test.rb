@@ -189,4 +189,34 @@ class SequenceTest < Test::Unit::TestCase
     assert_match Regexp.new("in sequence 'two'"), test_result.failures.first.message
   end
 
+  def test_should_constrain_invocations_to_occur_in_expected_order_using_sequence_block
+    test_result = run_as_test do
+      mock = mock()
+
+      in_sequence('one') do
+        mock.expects(:first)
+        mock.expects(:second)
+      end
+
+      mock.second
+      mock.first
+    end
+    assert_failed(test_result)
+  end
+
+  def test_should_allow_invocations_in_sequence
+    test_result = run_as_test do
+      mock = mock()
+
+      in_sequence('one') do
+        mock.expects(:first)
+        mock.expects(:second)
+      end
+
+      mock.first
+      mock.second
+    end
+    assert_passed(test_result)
+  end
+
 end

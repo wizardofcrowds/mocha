@@ -122,7 +122,13 @@ module Mocha # :nodoc:
     def sequence(name)
       Sequence.new(name)
     end
-    
+
+    def in_sequence(name, &block)
+      Mockery.instance.current_sequences.push(sequence(name))
+      yield
+      Mockery.instance.current_sequences.pop
+    end
+
     # :call-seq: states(name) -> state_machine
     #
     # Returns a new +state_machine+ that is used to constrain the order in which expectations can occur.

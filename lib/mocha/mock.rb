@@ -6,6 +6,7 @@ require 'mocha/method_matcher'
 require 'mocha/parameters_matcher'
 require 'mocha/unexpected_invocation'
 require 'mocha/argument_iterator'
+require 'mocha/mockery'
 
 module Mocha # :nodoc:
 
@@ -45,6 +46,9 @@ module Mocha # :nodoc:
         ensure_method_not_already_defined(method_name)
         expectation = Expectation.new(self, method_name, backtrace)
         expectation.returns(args.shift) if args.length > 0
+        if current_sequence = Mockery.instance.current_sequence
+          expectation.in_sequence(current_sequence)
+        end
         @expectations.add(expectation)
       }
     end
@@ -78,6 +82,9 @@ module Mocha # :nodoc:
         expectation = Expectation.new(self, method_name, backtrace)
         expectation.at_least(0)
         expectation.returns(args.shift) if args.length > 0
+        if current_sequence = Mockery.instance.current_sequence
+          expectation.in_sequence(current_sequence)
+        end
         @expectations.add(expectation)
       }
     end
@@ -163,7 +170,6 @@ module Mocha # :nodoc:
         if (matching_expectation = @expectations.match(symbol, *arguments)) || (!matching_expectation && !@everything_stubbed)
           matching_expectation.invoke(&block) if matching_expectation
           message = UnexpectedInvocation.new(self, symbol, *arguments).to_s
-          require 'mocha/mockery'
           message << Mockery.instance.mocha_inspect
           raise ExpectationError.new(message, caller)
         end
