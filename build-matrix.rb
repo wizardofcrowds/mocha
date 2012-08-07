@@ -46,12 +46,13 @@ EXCLUDED_RUBY_193_GEMFILES = [
 
 ["1.8.7-p352", "1.9.3-p125-perf"].each do |ruby_version|
   execute("rbenv local #{ruby_version}")
-  ["test-unit", "minitest"].each do |test_library|
+  ["test-unit", "minitest", "activesupport-and-minitest", "activesupport-and-test-unit"].each do |name|
     reset_bundle
-    Dir["gemfiles/Gemfile.#{test_library}.*"].each do |gemfile|
+    Dir["gemfiles/Gemfile.#{name}.*"].each do |gemfile|
       ruby_version_without_patch = ruby_version.split("-")[0]
       next if (ruby_version_without_patch == "1.9.3") && EXCLUDED_RUBY_193_GEMFILES.include?(gemfile)
-      p [ruby_version_without_patch, test_library, gemfile]
+      ENV["INTEGRATION_TESTS_ONLY"] = name[/activesupport/]
+      p [ruby_version_without_patch, name, gemfile]
       run(gemfile)
     end
   end

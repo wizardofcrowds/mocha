@@ -5,11 +5,17 @@ require "bundler/setup"
 require 'yard'
 require 'rake/testtask'
 
-desc "Run all tests"
-task 'default' => ['test', 'test:performance']
+task 'default' => 'test'
 
-desc "Run unit & acceptance tests"
-task 'test' => ['test:units', 'test:acceptance']
+desc "Run tests"
+task 'test' do
+  if ENV['INTEGRATION_TESTS_ONLY']
+    Rake::Task['test:integration'].invoke
+  else
+    Rake::Task['test:units'].invoke
+    Rake::Task['test:acceptance'].invoke
+  end
+end
 
 namespace 'test' do
 
@@ -17,6 +23,7 @@ namespace 'test' do
   all_acceptance_tests = FileList['test/acceptance/*_test.rb']
   ruby186_incompatible_acceptance_tests = FileList['test/acceptance/stub_class_method_defined_on_*_test.rb'] + FileList['test/acceptance/stub_instance_method_defined_on_*_test.rb']
   ruby186_compatible_acceptance_tests = all_acceptance_tests - ruby186_incompatible_acceptance_tests
+  integration_tests = FileList['test/integration/**/*_test.rb']
 
   desc "Run unit tests"
   Rake::TestTask.new('units') do |t|
@@ -34,6 +41,14 @@ namespace 'test' do
     else
       t.test_files = ruby186_compatible_acceptance_tests
     end
+    t.verbose = true
+    t.warning = true
+  end
+
+  desc "Run integration tests (intended to be run in a separate process)"
+  Rake::TestTask.new('integration') do |t|
+    t.libs << 'test'
+    t.test_files = integration_tests
     t.verbose = true
     t.warning = true
   end

@@ -1,0 +1,8 @@
+source :rubygems
+
+gemspec :path=>"../"
+
+group :development do
+  gem "activesupport"
+  gem "minitest"
+end
