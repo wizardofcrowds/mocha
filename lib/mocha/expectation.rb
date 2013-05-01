@@ -281,6 +281,19 @@ module Mocha
       self
     end
 
+    # Add a proc to execute before return
+    #
+    # @param [Proc] The Proc instance to call
+    # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
+    #
+    # @example Sleeps 1 second before return
+    #   object = mock()
+    #   object.expects(:expected_method).before_return_executes(Proc.new { sleep 1 }).returns(3)
+    def before_return_executes(_proc)
+      @proc_to_execute = _proc
+      self
+    end
+
     # Modifies expectation so that when the expected method is called, it returns the specified +value+.
     #
     # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
@@ -509,6 +522,7 @@ module Mocha
       @cardinality, @invocation_count = Cardinality.exactly(1), 0
       @return_values = ReturnValues.new
       @yield_parameters = YieldParameters.new
+      @proc_to_execute = nil
       @backtrace = backtrace || caller
     end
 
@@ -566,6 +580,7 @@ module Mocha
           yield(*yield_parameters)
         end
       end
+      @proc_to_execute.call if @proc_to_execute
       @return_values.next
     end
 

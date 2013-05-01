@@ -93,6 +93,11 @@ class ExpectationTest < Test::Unit::TestCase
     assert !expectation.invocations_allowed?
   end
 
+  def test_should_execute_a_given_proc
+    expectation = new_expectation.before_return_executes(Proc.new { puts "hello" })
+    assert expectation.match?(:expected_method)
+  end
+
   def test_should_store_provided_backtrace
     backtrace = Object.new
     expectation = Expectation.new(nil, :expected_method, backtrace)
